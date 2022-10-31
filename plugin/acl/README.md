@@ -6,7 +6,13 @@
 
 ## Description
 
-With `acl` enabled, users are able to block or filter suspicious DNS queries by configuring IP filter rule sets, i.e. allowing authorized queries to recurse or blocking unauthorized queries.
+With `acl` enabled, users are able to block or filter suspicious DNS queries by configuring IP filter rule sets, i.e. allowing authorized queries or blocking unauthorized queries.
+
+
+When evaluating the rule sets, _acl_ uses the source IP of the TCP/UDP headers of the DNS query received by CoreDNS.
+This source IP will be different than the IP of the client originating the request in cases where the source IP of the request is changed in transit.  For example:
+* if the request passes though an intermediate forwarding DNS server or recursive DNS server before reaching CoreDNS
+* if the request traverses a Source NAT before reaching CoreDNS
 
 This plugin can be used multiple times per Server Block.
 
@@ -83,8 +89,10 @@ example.org {
 
 If monitoring is enabled (via the _prometheus_ plugin) then the following metrics are exported:
 
-- `coredns_acl_blocked_requests_total{server, zone}` - counter of DNS requests being blocked.
+- `coredns_acl_blocked_requests_total{server, zone, view}` - counter of DNS requests being blocked.
 
-- `coredns_acl_allowed_requests_total{server}` - counter of DNS requests being allowed.
+- `coredns_acl_filtered_requests_total{server, zone, view}` - counter of DNS requests being filtered.
+
+- `coredns_acl_allowed_requests_total{server, view}` - counter of DNS requests being allowed.
 
 The `server` and `zone` labels are explained in the _metrics_ plugin documentation.
